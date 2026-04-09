@@ -5,12 +5,33 @@ export { getImageUrl, getItemImageSource } from './lib/media';
 export { normalizeItem, normalizeItems } from './lib/normalizers';
 
 export {
-  fetchSearch,
-  fetchItem,
-  fetchVeranstalter,
-  fetchVeranstalterItems,
-  fetchKategorieItems,
   fetchHome,
   fetchStats,
   fetchTop10,
+  fetchTop3,
+  fetchNewest,
+  fetchSearch,
+  fetchItem,
+  fetchVeranstalter,
+  fetchKategorieItems,
 } from './services/gewinnspielService';
+
+export function getTitle(item = {}) {
+  return item?.titel || item?.clickbait || item?.title || '';
+}
+
+export function getVeranstalter(item = {}) {
+  return item?.veranstalter || item?.anbieter || item?.partner || '';
+}
+
+export function getGesamtwert(item = {}) {
+  return Number(item?.gesamtwert || item?.wert || item?.value || 0);
+}
+
+export function getEndDatum(item = {}) {
+  return item?.enddatum || item?.ablaufdatum || '';
+}
+
+export function getKategorie(item = {}) {
+  return item?.kategorie || item?.category || '';
+}

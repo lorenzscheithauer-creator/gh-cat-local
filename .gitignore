@@ -39,3 +39,22 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# local env
+.env
+.env.local
+.env.*.local
+
+# expo / build
+.expo
+dist
+web-build
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# mac/linux junk
+.DS_Store
+Thumbs.db

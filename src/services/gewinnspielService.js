@@ -1,93 +1,155 @@
 import { getJson } from './apiClient';
 import { normalizeItem, normalizeItems } from '../lib/normalizers';
 
+export async function fetchHome() {
+  const data = await getJson('home.php');
+
+  return {
+    stats: {
+      total_value: Number(data?.stats?.total_value || 0),
+      active_count: Number(data?.stats?.active_count || 0),
+      prize_count: Number(data?.stats?.prize_count || 0),
+    },
+    top3: {
+      items: normalizeItems(data?.top3?.items || []),
+    },
+    newest: {
+      items: normalizeItems(data?.newest?.items || []),
+    },
+    ending_soon: {
+      items: normalizeItems(data?.ending_soon?.items || []),
+    },
+    raw: data,
+  };
+}
+
+export async function fetchStats(cat) {
+  const data = await getJson('stats.php', cat ? { cat } : undefined);
+
+  return {
+    total_value: Number(data?.total_value || 0),
+    active_count: Number(data?.active_count || 0),
+    prize_count: Number(data?.prize_count || 0),
+    raw: data,
+  };
+}
+
+export async function fetchTop10() {
+  const data = await getJson('top10.php');
+  return {
+    items: normalizeItems(data?.items || []),
+    raw: data,
+  };
+}
+
+export async function fetchTop3() {
+  const data = await getJson('top3.php');
+  return {
+    items: normalizeItems(data?.items || []),
+    raw: data,
+  };
+}
+
+export async function fetchNewest(limit = 10) {
+  const data = await getJson('newest.php', { limit });
+  return {
+    items: normalizeItems(data?.items || []),
+    raw: data,
+  };
+}
+
 export async function fetchSearch(params = {}) {
-  const data = await getJson('search.php', params);
-  if (Array.isArray(data)) return normalizeItems(data);
-  if (Array.isArray(data?.items)) return normalizeItems(data.items);
-  return [];
+  const q = String(params?.q ?? '').trim();
+  const page = Number(params?.page || 1);
+  const perPage = Number(params?.per_page || params?.perPage || 10);
+
+  if (!q) {
+    const data = await getJson('list.php', {
+      cat: params?.cat || 'alle',
+      page,
+      per_page: perPage,
+    });
+
+    return {
+      q: '',
+      page: Number(data?.page || page),
+      per_page: Number(data?.per_page || perPage),
+      total: Number(data?.total || 0),
+      items: normalizeItems(data?.items || []),
+      raw: data,
+    };
+  }
+
+  const data = await getJson('search.php', {
+    ...params,
+    q,
+    page,
+    per_page: perPage,
+  });
+
+  return {
+    q: data?.q || q,
+    page: Number(data?.page || page),
+    per_page: Number(data?.per_page || perPage),
+    total: Number(data?.total || 0),
+    items: normalizeItems(data?.items || []),
+    raw: data,
+  };
 }
 
 export async function fetchItem(id) {
   const data = await getJson('item.php', { id });
-  return normalizeItem(data?.item || data);
+  return normalizeItem(data?.item || {});
 }
 
 export async function fetchVeranstalter() {
   const data = await getJson('veranstalter.php');
-  if (Array.isArray(data)) return data;
-  if (Array.isArray(data?.items)) return data.items;
-  return [];
+  return {
+    total: Number(data?.total || 0),
+    items: Array.isArray(data?.items) ? data.items : [],
+    raw: data,
+  };
 }
 
-export async function fetchVeranstalterItems(name) {
-  const data = await getJson('veranstalter_items.php', { veranstalter: name });
-  if (Array.isArray(data)) return normalizeItems(data);
-  if (Array.isArray(data?.items)) return normalizeItems(data.items);
-  return [];
-}
-
-export async function fetchKategorieItems(slug) {
-  const data = await getJson('kategorie_items.php', { slug });
+export async function fetchVeranstalterItems(name, page = 1, perPage = 10) {
+  const data = await getJson('veranstalter.php', {
+    veranstalter: name,
+    page,
+    per_page: perPage,
+  });
 
   return {
-    featured: data?.featured ? normalizeItem(data.featured) : null,
+    veranstalter: name,
+    page: Number(data?.page || page),
+    per_page: Number(data?.per_page || perPage),
+    total: Number(data?.total || 0),
+    items: normalizeItems(data?.items || []),
+    raw: data,
+  };
+}
+
+export async function fetchKategorieItems(slug, page = 1, perPage = 10) {
+  const data = await getJson('list.php', {
+    cat: slug || 'alle',
+    page,
+    per_page: perPage,
+  });
+
+  const allItems = normalizeItems(data?.items || []);
+  const activeItems = allItems.filter((item) => item?.raw?.active === true || item?.raw?.active === 1 || item?.raw?.active === '1');
+  const inactiveItems = allItems.filter((item) => !(item?.raw?.active === true || item?.raw?.active === 1 || item?.raw?.active === '1'));
+
+  return {
+    page: Number(data?.page || page),
+    per_page: Number(data?.per_page || perPage),
+    total: Number(data?.total || allItems.length),
+    featured: activeItems[0] || allItems[0] || null,
     active: {
-      items: normalizeItems(data?.active?.items || []),
+      items: activeItems,
     },
     inactive: {
-      items: normalizeItems(data?.inactive?.items || []),
+      items: inactiveItems,
     },
-  };
-}
-
-export async function fetchHome() {
-  const data = await getJson('home.php');
-  return {
-    newest: normalizeItems(data?.newest || data?.latest || data?.items || []),
-    top: normalizeItems(data?.top || data?.top10 || []),
-    featured: normalizeItems(data?.featured || []),
     raw: data,
   };
-}
-
-export async function fetchStats() {
-  const data = await getJson('list.php');
-
-  return {
-    total_value: Number(
-      data?.total_value ??
-      data?.gesamtwert ??
-      data?.stats?.total_value ??
-      0
-    ),
-    active_count: Number(
-      data?.active_count ??
-      data?.aktiv ??
-      data?.stats?.active_count ??
-      0
-    ),
-    ended_count: Number(
-      data?.ended_count ??
-      data?.abgelaufen ??
-      data?.stats?.ended_count ??
-      0
-    ),
-    total_count: Number(
-      data?.total_count ??
-      data?.gesamt ??
-      data?.stats?.total_count ??
-      0
-    ),
-    raw: data,
-  };
-}
-
-
-export async function fetchTop10() {
-  const data = await getJson('top10.php');
-  if (Array.isArray(data)) return normalizeItems(data);
-  if (Array.isArray(data?.items)) return normalizeItems(data.items);
-  if (Array.isArray(data?.top10)) return normalizeItems(data.top10);
-  return [];
 }
