@@ -44,6 +44,10 @@ export function getKategorieParts(item = {}) {
     .filter(Boolean);
 }
 
+export function getPrimaryKategorie(item = {}) {
+  return getKategorieParts(item)[0] || getKategorie(item) || '';
+}
+
 export function getCategoryLabel(category = '') {
   const value = String(category || '').trim();
   return value || 'Allgemein';
