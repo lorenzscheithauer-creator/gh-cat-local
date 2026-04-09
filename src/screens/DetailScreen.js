@@ -1,17 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Image, Linking, Pressable } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import {
-  fetchItem,
-  getTitle,
-  getVeranstalter,
-  getGesamtwert,
-  getEndDatum,
-  getTeilnahmeUrl,
-  formatEuro,
-  getKategorieParts,
-  getPrimaryKategorie,
-} from '../api';
+import { fetchItem, getTitle, getVeranstalter, getGesamtwert, getEndDatum, getTeilnahmeUrl, formatEuro, getKategorieParts, getPrimaryKategorie, getTeilnahmeText } from '../api';
 import { getCategoryImageBySlug, getCategoryLabel } from '../categoryData';
 
 function splitGewinne(value) {
@@ -218,7 +208,14 @@ export default function DetailScreen({ route, navigation }) {
             <Text style={styles.ctaText}>Zur Teilnahme</Text>
           </Pressable>
         ) : null}
-      </ScrollView>
+      
+        {teilnahmeUrl ? (
+          <Pressable style={styles.joinButton} onPress={openTeilnahme}>
+            <Text style={styles.joinButtonText}>{teilnahmeText || 'Jetzt teilnehmen'}</Text>
+          </Pressable>
+        ) : null}
+
+</ScrollView>
     </View>
   );
 }
@@ -410,4 +407,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '900',
   },
+  joinButton: {
+    marginTop: 18,
+    marginBottom: 28,
+    backgroundColor: '#E53935',
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#E53935',
+    shadowOpacity: 0.22,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+  },
+  joinButtonText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: '900',
+  },
+
 });

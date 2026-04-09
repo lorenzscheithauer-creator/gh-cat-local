@@ -56,6 +56,7 @@ export function getCategoryLabel(category = '') {
 export function getTeilnahmeUrl(item = {}) {
   return (
     item?.teilnahme_url ||
+    item?.teilnahmeUrl ||
     item?.url ||
     item?.link ||
     item?.gewinnspiel_link ||
@@ -66,6 +67,7 @@ export function getTeilnahmeUrl(item = {}) {
 export function getTeilnahmeText(item = {}) {
   return (
     item?.teilnahme_text ||
+    item?.teilnahmeText ||
     item?.loesung ||
     item?.teilnahme ||
     item?.cta ||

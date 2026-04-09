@@ -102,7 +102,11 @@ export async function fetchItem(id) {
   return normalizeItem(data?.item || {});
 }
 
-export async function fetchVeranstalter() {
+export async function fetchVeranstalter(nameOrNothing, page = 1, perPage = 10) {
+  if (typeof nameOrNothing === 'string' && nameOrNothing.trim()) {
+    return fetchVeranstalterItems(nameOrNothing.trim(), page, perPage);
+  }
+
   const data = await getJson('veranstalter.php');
   return {
     total: Number(data?.total || 0),
