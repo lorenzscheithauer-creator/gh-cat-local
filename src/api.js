@@ -13,6 +13,7 @@ export {
   fetchSearch,
   fetchItem,
   fetchVeranstalter,
+  fetchVeranstalterItems,
   fetchKategorieItems,
 } from './services/gewinnspielService';
 
@@ -34,4 +35,16 @@ export function getEndDatum(item = {}) {
 
 export function getKategorie(item = {}) {
   return item?.kategorie || item?.category || '';
+}
+
+export function getKategorieParts(item = {}) {
+  return String(getKategorie(item))
+    .split(/[;,|/]/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+export function getCategoryLabel(category = '') {
+  const value = String(category || '').trim();
+  return value || 'Allgemein';
 }
