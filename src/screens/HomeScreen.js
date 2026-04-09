@@ -1,24 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, useWindowDimensions, Image } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, Image } from 'react-native';
 import { fetchHome, fetchStats, formatEuro, getGesamtwert, getEndDatum } from '../api';
-import { CATEGORIES, COLORS } from '../theme';
+import { COLORS } from '../theme';
 import {
   Screen,
   SectionTitle,
   Loading,
-  CategoryChip,
   GewinnspielCard,
   GlassCard,
 } from '../components/UI';
-
-const ORDER = [
-  'technik','computer','urlaub','reisen','fernseher','bargeld',
-  'fahrrad','haus','kosmetik','baby','buecher','mercedes',
-  'audi','spielzeug','sport','lebensmittel','mode','grill',
-  'wertanlage','konzert','fussball','haribo','konsole','lautsprecher',
-  'saugroboter','smartphone','tankgutschein','kaffee','kopfhoerer',
-  'motorrad','nintendo_switch','produktpakete','filme','auto'
-];
+import CategoryGrid from '../components/CategoryGrid';
 
 function formatInt(value) {
   return new Intl.NumberFormat('de-DE').format(Number(value || 0));
@@ -38,15 +29,13 @@ function getCountdownLabel(enddatum) {
 }
 
 export default function HomeScreen({ navigation }) {
-  const { width } = useWindowDimensions();
-  const columns = width < 360 ? 2 : 3;
-
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({ total_value: 0, active_count: 0, prize_count: 0 });
   const [home, setHome] = useState({ top3: { items: [] }, newest: { items: [] }, ending_soon: { items: [] } });
 
   useEffect(() => {
     let alive = true;
+
     Promise.all([fetchStats(), fetchHome()])
       .then(([statsData, homeData]) => {
         if (!alive) return;
@@ -59,34 +48,41 @@ export default function HomeScreen({ navigation }) {
         setStats({ total_value: 0, active_count: 0, prize_count: 0 });
         setHome({ top3: { items: [] }, newest: { items: [] }, ending_soon: { items: [] } });
       })
-      .finally(() => alive && setLoading(false));
+      .finally(() => {
+        if (alive) setLoading(false);
+      });
 
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, []);
 
-  const cats = useMemo(() => {
-    const arr = Array.isArray(CATEGORIES) ? CATEGORIES.filter((c) => c.slug !== 'alle') : [];
-    const bySlug = new Map(arr.map((c) => [c.slug, c]));
-    const ordered = ORDER.map((slug) => bySlug.get(slug)).filter(Boolean);
-    const rest = arr.filter((c) => !ORDER.includes(c.slug));
-    return [...ordered, ...rest];
-  }, []);
+  const top3Items = useMemo(() => home?.top3?.items || [], [home]);
 
-  const top3Items = home?.top3?.items || [];
-  const newestItems = (home?.newest?.items || [])
-    .filter((item) => getGesamtwert(item) >= 100)
-    .sort((a, b) => Number(b.id || 0) - Number(a.id || 0))
-    .slice(0, 10);
+  const newestItems = useMemo(() => {
+    return (home?.newest?.items || [])
+      .filter((item) => getGesamtwert(item) >= 100)
+      .sort((a, b) => Number(b.id || 0) - Number(a.id || 0))
+      .slice(0, 10);
+  }, [home]);
 
-  const endingSoonItems = (home?.ending_soon?.items || [])
-    .filter((item) => getGesamtwert(item) >= 1000)
-    .sort((a, b) => String(getEndDatum(a)).localeCompare(String(getEndDatum(b))))
-    .slice(0, 10);
+  const endingSoonItems = useMemo(() => {
+    return (home?.ending_soon?.items || [])
+      .filter((item) => getGesamtwert(item) >= 1000)
+      .sort((a, b) => String(getEndDatum(a)).localeCompare(String(getEndDatum(b))))
+      .slice(0, 10);
+  }, [home]);
 
   const goDetail = (item) => navigation.navigate('Detail', { id: item?.id, item });
   const goCategory = (cat) => navigation.navigate('KategorieDetail', { slug: cat.slug, title: cat.label });
 
-  if (loading) return <Screen><Loading /></Screen>;
+  if (loading) {
+    return (
+      <Screen>
+        <Loading />
+      </Screen>
+    );
+  }
 
   return (
     <Screen>
@@ -111,55 +107,68 @@ export default function HomeScreen({ navigation }) {
           </View>
         </View>
 
-        <SectionTitle>
-          Top 3 Highlights
-        </SectionTitle>
-        {top3Items.length ? top3Items.map((item, index) => (
-          <GewinnspielCard key={`top-${item.id || index}`} item={item} rank={index} onPress={() => goDetail(item)} />
-        )) : (
-          <GlassCard style={styles.emptyCard}><Text style={styles.emptyText}>Keine Top-Gewinnspiele vorhanden.</Text></GlassCard>
+        <SectionTitle>Top 3 Highlights</SectionTitle>
+        {top3Items.length ? (
+          top3Items.map((item, index) => (
+            <GewinnspielCard
+              key={`top-${item.id || index}`}
+              item={item}
+              rank={index}
+              onPress={() => goDetail(item)}
+            />
+          ))
+        ) : (
+          <GlassCard style={styles.emptyCard}>
+            <Text style={styles.emptyText}>Keine Top-Gewinnspiele vorhanden.</Text>
+          </GlassCard>
         )}
 
-        <SectionTitle>
-          Neu hinzugefügt
-        </SectionTitle>
-        {newestItems.length ? newestItems.map((item, index) => (
-          <GewinnspielCard key={`new-${item.id || index}`} item={item} onPress={() => goDetail(item)} />
-        )) : (
-          <GlassCard style={styles.emptyCard}><Text style={styles.emptyText}>Keine passenden neuen Gewinnspiele vorhanden.</Text></GlassCard>
+        <SectionTitle>Neu hinzugefügt</SectionTitle>
+        {newestItems.length ? (
+          newestItems.map((item, index) => (
+            <GewinnspielCard
+              key={`new-${item.id || index}`}
+              item={item}
+              onPress={() => goDetail(item)}
+            />
+          ))
+        ) : (
+          <GlassCard style={styles.emptyCard}>
+            <Text style={styles.emptyText}>Keine passenden neuen Gewinnspiele vorhanden.</Text>
+          </GlassCard>
         )}
 
-        <SectionTitle>
-          Bald ablaufend
-        </SectionTitle>
-        {endingSoonItems.length ? endingSoonItems.map((item, index) => (
-          <GewinnspielCard
-            key={`ending-${item.id || index}`}
-            item={item}
-            countdownLabel={getCountdownLabel(getEndDatum(item))}
-            onPress={() => goDetail(item)}
-          />
-        )) : (
-          <GlassCard style={styles.emptyCard}><Text style={styles.emptyText}>Keine bald endenden Gewinnspiele vorhanden.</Text></GlassCard>
+        <SectionTitle>Bald ablaufend</SectionTitle>
+        {endingSoonItems.length ? (
+          endingSoonItems.map((item, index) => (
+            <GewinnspielCard
+              key={`ending-${item.id || index}`}
+              item={item}
+              countdownLabel={getCountdownLabel(getEndDatum(item))}
+              onPress={() => goDetail(item)}
+            />
+          ))
+        ) : (
+          <GlassCard style={styles.emptyCard}>
+            <Text style={styles.emptyText}>Keine bald endenden Gewinnspiele vorhanden.</Text>
+          </GlassCard>
         )}
 
-        <SectionTitle>
-          Kategorien
-        </SectionTitle>
-        <View style={styles.grid}>
-          {cats.map((cat) => (
-            <View key={cat.slug} style={[styles.gridItem, columns === 3 ? styles.gridItem3 : styles.gridItem2]}>
-              <CategoryChip image={cat.image} label={cat.label} subtitle="Jetzt entdecken" onPress={() => goCategory(cat)} />
-            </View>
-          ))}
-        </View>
+        <SectionTitle>Kategorien</SectionTitle>
+        <CategoryGrid
+          includeAlle={false}
+          onPressCategory={goCategory}
+        />
       </ScrollView>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16, paddingBottom: 95 },
+  container: {
+    padding: 16,
+    paddingBottom: 95,
+  },
 
   brandHero: {
     backgroundColor: 'rgba(14,30,60,0.97)',
@@ -218,11 +227,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
 
-  grid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', marginBottom: 10 },
-  gridItem: { marginBottom: 10 },
-  gridItem3: { width: '31.5%' },
-  gridItem2: { width: '48.5%' },
-
-  emptyCard: { padding: 18, marginBottom: 12 },
-  emptyText: { color: COLORS.muted, fontSize: 15 },
+  emptyCard: {
+    padding: 18,
+    marginBottom: 12,
+  },
+  emptyText: {
+    color: COLORS.muted,
+    fontSize: 15,
+  },
 });
