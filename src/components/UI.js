@@ -20,19 +20,9 @@ import {
   formatEuro,
 } from '../api';
 import { getCategoryImageBySlug } from '../categoryData';
+import { COLORS } from '../constants/design';
+import { getCountdownLabel } from '../lib/countdown';
 
-const COLORS = {
-  bg: '#031733',
-  card: 'rgba(18, 34, 64, 0.96)',
-  border: 'rgba(255,255,255,0.08)',
-  text: '#ffffff',
-  muted: 'rgba(255,255,255,0.74)',
-  soft: 'rgba(255,255,255,0.55)',
-  primary: '#21c8f6',
-  secondary: '#7c5cff',
-  success: '#34d399',
-  warning: '#f59e0b',
-};
 
 function normalizeParts(value) {
   return String(value || '')
@@ -50,29 +40,6 @@ function getCategoryParts(item) {
 
 function getPrizeLines(item, max = 3) {
   return normalizeParts(item?.gewinne).slice(0, max);
-}
-
-function parseDateSafe(value) {
-  if (!value) return null;
-  const s = String(value).trim();
-  if (!s) return null;
-  const d = new Date(s.length === 10 ? `${s}T23:59:59` : s);
-  return Number.isNaN(d.getTime()) ? null : d;
-}
-
-function getCountdownLabel(enddatum) {
-  const end = parseDateSafe(enddatum);
-  if (!end) return null;
-  const now = new Date();
-  const diff = end.getTime() - now.getTime();
-  if (diff <= 0) return 'Abgelaufen';
-
-  const totalHours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(totalHours / 24);
-  const hours = totalHours % 24;
-
-  if (days > 0) return `${days} T ${hours} Std`;
-  return `${hours} Std`;
 }
 
 export function Screen({ children, style }) {

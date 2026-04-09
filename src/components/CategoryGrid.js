@@ -1,17 +1,9 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { CATEGORIES } from '../theme';
+import { CATEGORY_ORDER } from '../constants/categoryOrder';
 import { CategoryChip } from './UI';
 
-const ORDER = [
-  'alle',
-  'technik','computer','urlaub','reisen','fernseher','bargeld',
-  'fahrrad','haus','kosmetik','baby','buecher','mercedes',
-  'audi','spielzeug','sport','lebensmittel','mode','grill',
-  'wertanlage','konzert','fussball','haribo','konsole','lautsprecher',
-  'saugroboter','smartphone','tankgutschein','kaffee','kopfhoerer',
-  'motorrad','nintendo_switch','produktpakete','filme','auto'
-];
 
 export default function CategoryGrid({
   onPressCategory,
@@ -21,8 +13,8 @@ export default function CategoryGrid({
     const arr = Array.isArray(CATEGORIES) ? [...CATEGORIES] : [];
     const filtered = includeAlle ? arr : arr.filter((c) => c.slug !== 'alle');
     const bySlug = new Map(filtered.map((c) => [c.slug, c]));
-    const ordered = ORDER.map((slug) => bySlug.get(slug)).filter(Boolean);
-    const rest = filtered.filter((c) => !ORDER.includes(c.slug));
+    const ordered = CATEGORY_ORDER.map((slug) => bySlug.get(slug)).filter(Boolean);
+    const rest = filtered.filter((c) => !CATEGORY_ORDER.includes(c.slug));
     return [...ordered, ...rest];
   }, [includeAlle]);
 

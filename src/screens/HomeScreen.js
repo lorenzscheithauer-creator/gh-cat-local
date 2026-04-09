@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, Image } from 'react-native';
 import { fetchHome, fetchStats, formatEuro, getGesamtwert, getEndDatum } from '../api';
-import { COLORS } from '../theme';
+import { COLORS } from '../constants/design';
 import {
   Screen,
   SectionTitle,
@@ -10,23 +10,12 @@ import {
   GlassCard,
 } from '../components/UI';
 import CategoryGrid from '../components/CategoryGrid';
+import { getCountdownLabel } from '../lib/countdown';
 
 function formatInt(value) {
   return new Intl.NumberFormat('de-DE').format(Number(value || 0));
 }
 
-function getCountdownLabel(enddatum) {
-  if (!enddatum) return null;
-  const end = new Date(`${String(enddatum).slice(0, 10)}T23:59:59`);
-  if (Number.isNaN(end.getTime())) return null;
-  const diff = end.getTime() - Date.now();
-  if (diff <= 0) return 'Abgelaufen';
-  const totalHours = Math.floor(diff / (1000 * 60 * 60));
-  const days = Math.floor(totalHours / 24);
-  const hours = totalHours % 24;
-  if (days > 0) return `${days} T ${hours} Std`;
-  return `${hours} Std`;
-}
 
 export default function HomeScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
