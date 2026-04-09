@@ -52,3 +52,46 @@ export function getCategoryLabel(category = '') {
   const value = String(category || '').trim();
   return value || 'Allgemein';
 }
+
+export function getTeilnahmeUrl(item = {}) {
+  return (
+    item?.teilnahme_url ||
+    item?.url ||
+    item?.link ||
+    item?.gewinnspiel_link ||
+    ''
+  );
+}
+
+export function getTeilnahmeText(item = {}) {
+  return (
+    item?.teilnahme_text ||
+    item?.loesung ||
+    item?.teilnahme ||
+    item?.cta ||
+    'Jetzt teilnehmen'
+  );
+}
+
+export function getKurzbeschreibung(item = {}) {
+  return (
+    item?.kurzbeschreibung ||
+    item?.summary ||
+    item?.zusammenfassung ||
+    ''
+  );
+}
+
+export function getBeschreibung(item = {}) {
+  return (
+    item?.beschreibung ||
+    item?.details ||
+    item?.zusammenfassung ||
+    item?.kurzbeschreibung ||
+    ''
+  );
+}
+
+export function getPrizeCount(item = {}) {
+  return Number(item?.anzahl_gewinne || item?.prize_count || 0);
+}
