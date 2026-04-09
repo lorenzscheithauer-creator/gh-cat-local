@@ -40,7 +40,7 @@ export function getKategorie(item = {}) {
 export function getKategorieParts(item = {}) {
   return String(getKategorie(item))
     .split(/[;,|/]/)
-    .map((part) => part.trim())
+    .map((x) => x.trim())
     .filter(Boolean);
 }
 
@@ -49,8 +49,7 @@ export function getPrimaryKategorie(item = {}) {
 }
 
 export function getCategoryLabel(category = '') {
-  const value = String(category || '').trim();
-  return value || 'Allgemein';
+  return String(category || '').trim() || 'Allgemein';
 }
 
 export function getTeilnahmeUrl(item = {}) {
@@ -68,20 +67,13 @@ export function getTeilnahmeText(item = {}) {
   return (
     item?.teilnahme_text ||
     item?.teilnahmeText ||
-    item?.loesung ||
-    item?.teilnahme ||
     item?.cta ||
     'Jetzt teilnehmen'
   );
 }
 
 export function getKurzbeschreibung(item = {}) {
-  return (
-    item?.kurzbeschreibung ||
-    item?.summary ||
-    item?.zusammenfassung ||
-    ''
-  );
+  return item?.kurzbeschreibung || item?.summary || item?.zusammenfassung || '';
 }
 
 export function getBeschreibung(item = {}) {

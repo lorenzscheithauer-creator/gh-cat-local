@@ -115,19 +115,50 @@ export async function fetchVeranstalter(nameOrNothing, page = 1, perPage = 10) {
   };
 }
 
-export async function fetchVeranstalterItems(name, page = 1, perPage = 10) {
-  const data = await getJson('veranstalter.php', {
-    veranstalter: name,
+export async function fetchVeranstalterItems(name, page = 1, perPage = 50) {
+  const trimmed = String(name || '').trim();
+
+  let data = await getJson('veranstalter.php', {
+    veranstalter: trimmed,
     page,
     per_page: perPage,
   });
 
+  let items = normalizeItems(data?.items || []);
+
+  if ((!items || items.length === 0) && trimmed) {
+    const fallback = await getJson('search.php', {
+      q: trimmed,
+      page: 1,
+      per_page: perPage,
+    });
+
+    const fallbackItems = normalizeItems(fallback?.items || []).filter(
+      (item) => String(item?.veranstalter || '').trim().toLowerCase() === trimmed.toLowerCase()
+    );
+
+    data = {
+      veranstalter: trimmed,
+      page: 1,
+      per_page: perPage,
+      total: fallbackItems.length,
+      items: fallbackItems.map((x) => x.raw || x),
+    };
+    items = fallbackItems;
+  }
+
+  const activeItems = items.filter((item) => item?.active === true || item?.raw?.active === true || item?.raw?.active === 1 || item?.raw?.active === '1');
+  const inactiveItems = items.filter((item) => !(item?.active === true || item?.raw?.active === true || item?.raw?.active === 1 || item?.raw?.active === '1'));
+
   return {
-    veranstalter: name,
+    veranstalter: trimmed,
     page: Number(data?.page || page),
     per_page: Number(data?.per_page || perPage),
-    total: Number(data?.total || 0),
-    items: normalizeItems(data?.items || []),
+    total: Number(data?.total || items.length),
+    featured: activeItems[0] || items[0] || null,
+    active: { items: activeItems },
+    inactive: { items: inactiveItems },
+    items,
     raw: data,
   };
 }
