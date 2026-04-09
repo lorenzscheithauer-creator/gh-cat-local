@@ -1,0 +1,13 @@
+BEKANNTE FEHLER / HISTORIE
+
+- ReferenceError: TouchableOpacity doesn't exist
+  -> Ursache: fehlender Import in src/components/UI.js
+
+- TypeError: getCategoryBySlug is not a function
+  -> Ursache: fehlende oder fehlerhafte Helper-Funktion in src/theme.js
+
+- Invalid value in color array: undefined
+  -> Ursache: COLORS.purple bzw. undefinierte Farbe in Top10Screen.js
+
+- Syntaxfehler in SearchScreen.js
+  -> Ursache: kaputte Style-Definition bei heroSub / heroSubtitle

@@ -1,0 +1,90 @@
+GEWINNHAI APP – ÜBERGABE / AKTUELLER STAND
+
+Projektordner:
+~/Downloads/gh-cat-local
+
+WICHTIGE DATEIEN:
+- App.js
+- app.json
+- src/api.js
+- src/theme.js
+- src/categoryData.js
+- src/components/UI.js
+- src/screens/
+- assets/
+- .env
+
+API / PHP:
+- search.php
+- item.php
+- kategorie_items.php
+- veranstalter.php
+- veranstalter_items.php
+
+WAS SCHON LÄUFT:
+- Expo-Projekt vorhanden
+- Kategorien-Bilder im assets-Ordner
+- API-Anbindung ist grundsätzlich da
+- Startseite, Suche, Kategorien, Veranstalter, Top 10 existieren
+- PHP-Dateien für Suche / Kategorien / Veranstalter liegen im Projektordner
+
+AKTUELLE PROBLEME:
+- Frontend wurde mehrfach manuell gepatcht, dadurch sind evtl. inkonsistente Screens entstanden
+- Header-Design soll vereinheitlicht werden
+- Es gab Syntax-/Importfehler in SearchScreen.js und UI.js
+- Teilweise stimmen Screens stilistisch noch nicht überein
+- Top-10 / Kategorien / Veranstalter sollen optisch konsistent sein
+- Es muss geprüft werden, welche Version der einzelnen Screens aktuell stabil läuft
+
+WORAN WEITERGEARBEITET WERDEN SOLL:
+1. Alle Screens prüfen:
+   - src/screens/HomeScreen.js
+   - src/screens/Top10Screen.js
+   - src/screens/SearchScreen.js
+   - src/screens/CategoryScreen.js
+   - src/screens/KategorieDetailScreen.js
+   - src/screens/VeranstalterScreen.js
+   - src/screens/VeranstalterDetailScreen.js
+   - src/screens/DetailScreen.js
+
+2. Einheitliches Header-Design umsetzen
+   - Startseite soll so bleiben
+   - alle anderen Header angleichen
+
+3. Kategorien:
+   - immer 3 nebeneinander
+   - nur Bild + Name
+   - kein unnötiger Zusatztext
+
+4. Suche:
+   - prüfen, dass sie ohne Syntaxfehler startet
+   - Filter testen
+   - Scroll zu Ergebnissen testen
+
+5. API-Endpunkte testen:
+   - /api/search.php
+   - /api/item.php
+   - /api/kategorie_items.php
+   - /api/veranstalter.php
+   - /api/veranstalter_items.php
+
+6. Vor Build:
+   - npm install
+   - npx expo start --clear
+   - Fehler in Metro vollständig prüfen
+
+NÜTZLICHE BEFEHLE:
+- Projekt starten:
+  cd ~/Downloads/gh-cat-local
+  npx expo start --clear --go
+
+- Node/Expo killen:
+  pkill -f expo
+  pkill -f node
+
+- Syntax prüfen:
+  sed -n '1,220p' src/components/UI.js
+  sed -n '1,340p' src/screens/SearchScreen.js
+
+- Dateien listen:
+  find . -maxdepth 2 | sort
